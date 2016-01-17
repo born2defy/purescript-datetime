@@ -16,6 +16,7 @@ module Data.Date
   , Month(..)
   , DayOfMonth(..)
   , DayOfWeek(..)
+  , getDay, getDate, getMonth, getYear, prettyDate, addDays
   ) where
 
 import Prelude
@@ -23,8 +24,40 @@ import Prelude
 import Control.Monad.Eff
 import Data.Enum (Enum, Cardinality(..), fromEnum, defaultSucc, defaultPred)
 import Data.Function (on, Fn2(), runFn2, Fn3(), runFn3)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Time
+import Data.Int (toNumber)
+
+
+
+-- | Date Math
+withJSDateMethod :: String -> Date -> Int
+withJSDateMethod s = runFn2 jsDateMethod s <<< toJSDate
+
+getDay :: Date -> DayOfWeek
+getDay = fromMaybe Sunday <<< dayOfWeekToEnum <<< withJSDateMethod "getDay"
+
+getDate :: Date -> Int
+getDate = withJSDateMethod "getDate"
+
+getMonth :: Date -> Month
+getMonth = fromMaybe January <<< monthToEnum <<< withJSDateMethod "getMonth"
+
+getYear :: Date -> Year
+getYear = Year <<< withJSDateMethod "getFullYear"
+
+prettyDate :: Date -> String
+prettyDate d = go getDay getMonth getDate getYear
+  where
+  go day month date year = fmt day <> ", " <> fmt month <> " " <> fmt date <> ", " <> fmtYr year
+  fmt :: forall a. (Show a) => (Date -> a) -> String
+  fmt = show <<< ($ d)
+  fmtYr = show <<< runYear <<< ($ d)
+  runYear (Year x) = x
+
+addDays :: Int -> Date -> Date
+addDays n d = fromMaybe d <<< fromEpochMilliseconds <<< (+ (Milliseconds $ (3600000.0 * 24.0 * toNumber n))) <<< toEpochMilliseconds $ d
+
 
 -- | A native JavaScript `Date` object.
 foreign import data JSDate :: *
@@ -78,6 +111,8 @@ fromString = fromJSDate <<< jsDateConstructor
 -- | an exact match or the resulting date is invalid.
 fromStringStrict :: String -> Maybe Date
 fromStringStrict s = runFn3 strictJsDate Just Nothing s >>= fromJSDate
+
+
 
 -- | Effect type for when accessing the current date/time.
 foreign import data Now :: !
