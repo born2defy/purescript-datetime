@@ -23,6 +23,11 @@ exports.jsDateMethod = function (method, date) {
 };
 
 // jshint maxparams: 3
+exports.jsDateMethodArg = function (method, date, arg) {
+  return date[method](arg);
+};
+
+// jshint maxparams: 3
 exports.strictJsDate = function (just, nothing, s) {
   var epoch = Date.parse(s);
   if (isNaN(epoch)) return nothing;

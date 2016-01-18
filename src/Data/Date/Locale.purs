@@ -13,20 +13,46 @@ module Data.Date.Locale
   , toLocaleString
   , toLocaleTimeString
   , toLocaleDateString
+  , showInternalDate, internalDate, convertDate
   ) where
 
 import Control.Monad.Eff (Eff())
 import Data.Date
 import Data.Enum (fromEnum, toEnum)
 import Data.Function (Fn2(), runFn2, Fn7(), runFn7)
-import Data.Maybe (Maybe())
+import Data.Maybe (Maybe(), fromMaybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.Time
 
+
 import Prelude
-  ( (<$>)
-  , (<<<)
-  , zero )
+
+
+type InternalDate
+  = { month :: Month
+    , day   :: DayOfMonth
+    , year  :: Year
+    }
+
+showInternalDate :: InternalDate -> String
+showInternalDate d =
+  show d.month <> " "
+  <> show (runDayOfMonth d.day) <> ", "
+  <> show (runYear d.year)
+
+internalDate :: Int -> Int -> Int -> InternalDate
+internalDate m d y = let month = asMonth m
+                         year  = Year (absInt y)
+                         day   = asDayOfMonth d month year
+                     in { month, day, year }
+
+convertDate :: forall e. InternalDate -> Eff (now :: Now, locale :: Locale | e) Date
+convertDate d = do
+  currentDate <- now
+  maybeDate   <- dateTime d.year d.month d.day (HourOfDay zero) (MinuteOfHour zero) (SecondOfMinute zero) (MillisecondOfSecond zero)
+  return $ fromMaybe currentDate maybeDate
+
+
 
 -- | The effect of reading the current system locale/timezone.
 foreign import data Locale :: !

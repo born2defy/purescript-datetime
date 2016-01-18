@@ -16,35 +16,38 @@ module Data.Date
   , Month(..)
   , DayOfMonth(..)
   , DayOfWeek(..)
-  , getDay, getDate, getMonth, getYear, prettyDate, addDays
+  , getDay, getDate, getMonth, getYear, prettyDate, addDays, subDays, isLeapYear, setDate, endOfMonth, beginningOfMonth, nextMonth
+  , absInt, asMonth, asDayOfMonth, runDayOfMonth, runYear
   ) where
 
 import Prelude
 
 import Control.Monad.Eff
-import Data.Enum (Enum, Cardinality(..), fromEnum, defaultSucc, defaultPred)
+import Data.Enum (Enum, Cardinality(..), fromEnum, defaultSucc, defaultPred, succ)
 import Data.Function (on, Fn2(), runFn2, Fn3(), runFn3)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Time
 import Data.Int (toNumber)
-
-
+import Data.Foldable (elem)
 
 -- | Date Math
-withJSDateMethod :: String -> Date -> Int
-withJSDateMethod s = runFn2 jsDateMethod s <<< toJSDate
+withJSDateMethodInt :: String -> Date -> Int
+withJSDateMethodInt s = runFn2 jsDateMethod s <<< toJSDate
+
+withJSDateMethodMS :: String -> Date -> Int -> Milliseconds
+withJSDateMethodMS s d n = runFn3 jsDateMethodArg s (toJSDate d) n
 
 getDay :: Date -> DayOfWeek
-getDay = fromMaybe Sunday <<< dayOfWeekToEnum <<< withJSDateMethod "getDay"
+getDay = fromMaybe Sunday <<< dayOfWeekToEnum <<< withJSDateMethodInt "getDay"
 
 getDate :: Date -> Int
-getDate = withJSDateMethod "getDate"
+getDate = withJSDateMethodInt "getDate"
 
 getMonth :: Date -> Month
-getMonth = fromMaybe January <<< monthToEnum <<< withJSDateMethod "getMonth"
+getMonth = fromMaybe January <<< monthToEnum <<< withJSDateMethodInt "getMonth"
 
 getYear :: Date -> Year
-getYear = Year <<< withJSDateMethod "getFullYear"
+getYear = Year <<< withJSDateMethodInt "getFullYear"
 
 prettyDate :: Date -> String
 prettyDate d = go getDay getMonth getDate getYear
@@ -53,10 +56,86 @@ prettyDate d = go getDay getMonth getDate getYear
   fmt :: forall a. (Show a) => (Date -> a) -> String
   fmt = show <<< ($ d)
   fmtYr = show <<< runYear <<< ($ d)
-  runYear (Year x) = x
 
 addDays :: Int -> Date -> Date
-addDays n d = fromMaybe d <<< fromEpochMilliseconds <<< (+ (Milliseconds $ (3600000.0 * 24.0 * toNumber n))) <<< toEpochMilliseconds $ d
+addDays n = withEpochMS $ add (daysToMS n)
+
+subDays :: Int -> Date -> Date
+subDays n = withEpochMS $ flip sub (daysToMS n)
+
+withEpochMS :: (Milliseconds -> Milliseconds) -> Date -> Date
+withEpochMS f d = fromMaybe d <<< fromEpochMilliseconds <<< f <<< toEpochMilliseconds $ d
+
+daysToMS :: Int -> Milliseconds
+daysToMS = Milliseconds <<< (* (3600000.0 * 24.0)) <<< toNumber
+
+endOfMonth ::  Date -> Date
+endOfMonth date = setDate (monthDays date) date
+  where
+  monthDays date = daysInMonth (getYear date) (getMonth date)
+
+daysInMonth :: Year -> Month -> Int
+daysInMonth y m = case m of
+  February -> if isLeapYear y then 29 else 28
+  April     ->  30
+  June      ->  30
+  September ->  30
+  November  ->  30
+  _         ->  31
+
+beginningOfMonth :: Date -> Date
+beginningOfMonth = setDate 1
+
+nextMonth :: Date -> Month
+nextMonth date = fromMaybe currMonth <<< succ $ currMonth
+  where currMonth = getMonth date
+
+setDate :: Int -> Date -> Date
+setDate n date =  fromMaybe date <<< fromEpochMilliseconds <<< withJSDateMethodMS "setDate" date $ n
+
+setMonth :: Int -> Date -> Date
+setMonth n date =  fromMaybe date <<< fromEpochMilliseconds <<< withJSDateMethodMS "setMonth" date $ n
+
+isLeapYear :: Year -> Boolean
+isLeapYear = (`elem` leapYears) <<< runYear
+
+leapYears :: Array Int
+leapYears =
+  [ 1804, 1808, 1812, 1816, 1820, 1824, 1828, 1832, 1836, 1840, 1844, 1848, 1852, 1856, 1860, 1864, 1868, 1872, 1876, 1880, 1884,
+    1888, 1892, 1896, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932, 1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972,
+    1976, 1980, 1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040, 2044, 2048, 2052, 2056,
+    2060, 2064, 2068, 2072, 2076, 2080, 2084, 2088, 2092, 2096, 2104, 2108, 2112, 2116, 2120, 2124, 2128, 2132, 2136, 2140, 2144,
+    2148, 2152, 2156, 2160, 2164, 2168, 2172, 2176, 2180, 2184, 2188, 2192, 2196, 2204, 2208, 2212, 2216, 2220, 2224, 2228, 2232,
+    2236, 2240, 2244, 2248, 2252, 2256, 2260, 2264, 2268, 2272, 2276, 2280, 2284, 2288, 2292, 2296, 2304, 2308, 2312, 2316, 2320,
+    2324, 2328, 2332, 2336, 2340, 2344, 2348, 2352, 2356, 2360, 2364, 2368, 2372, 2376, 2380, 2384, 2388, 2392, 2396, 2400
+  ]
+
+
+asMonth :: Int -> Month
+asMonth 0 = January
+asMonth n = fromMaybe January <<< monthToEnum <<< (`mod` 12) <<< (`sub` 1) $ absInt n
+
+asDayOfMonth :: Int -> Month -> Year -> DayOfMonth
+asDayOfMonth n m y = DayOfMonth <<< (`mod` (daysInMonth y m)) <<< absInt $ n
+
+
+absInt :: Int -> Int
+absInt n | n < 0     = n * (-1)
+         | otherwise = n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -- | A native JavaScript `Date` object.
@@ -135,6 +214,9 @@ timezoneOffset (DateTime d) = runFn2 jsDateMethod "getTimezoneOffset" d
 
 -- | A year date component value.
 newtype Year = Year Int
+
+runYear :: Year -> Int
+runYear (Year x) = x
 
 instance eqYear :: Eq Year where
   eq (Year x) (Year y) = x == y
@@ -255,6 +337,9 @@ instance ordDayOfMonth :: Ord DayOfMonth where
 instance showDayOfMonth :: Show DayOfMonth where
   show (DayOfMonth day) = "(DayOfMonth " ++ show day ++ ")"
 
+runDayOfMonth :: DayOfMonth -> Int
+runDayOfMonth (DayOfMonth x) = x
+
 -- | A day-of-week date component value.
 data DayOfWeek
   = Sunday
@@ -324,5 +409,7 @@ foreign import nowImpl :: forall e. (JSDate -> Date) -> Eff (now :: Now | e) Dat
 foreign import jsDateConstructor :: forall a. a -> JSDate
 
 foreign import jsDateMethod :: forall a. Fn2 String JSDate a
+
+foreign import jsDateMethodArg :: forall a b. Fn3 String JSDate a b
 
 foreign import strictJsDate :: Fn3 (forall a. a -> Maybe a) (forall a. Maybe a) String (Maybe JSDate)
