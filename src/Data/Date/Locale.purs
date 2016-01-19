@@ -27,7 +27,6 @@ import Data.Time
 
 import Prelude
 
-
 type InternalDate
   = { month :: Month
     , day   :: DayOfMonth
