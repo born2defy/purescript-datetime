@@ -16,8 +16,9 @@ module Data.Date
   , Month(..)
   , DayOfMonth(..)
   , DayOfWeek(..)
-  , getDay, getDate, getMonth, getYear, prettyDate, addDays, subDays, isLeapYear, setDate, endOfMonth, beginningOfMonth, nextMonth
+  , getDay, getDate, getMonth, getYear, prettyDate, addDays, subtractDays, isLeapYear, setDate, endOfMonth, beginningOfMonth, nextMonth
   , absInt, asMonth, asDayOfMonth, runDayOfMonth, runYear, fromEpochMillisecondsUnsafe
+  , JulianDay(..), toOrdinalDate, addJDays, diffJDays
   ) where
 
 import Prelude
@@ -28,6 +29,65 @@ import Data.Function (on, Fn2(), runFn2, Fn3(), runFn3)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Time
 import Data.Int (toNumber)
+import Data.Tuple
+import Data.Ord (min)
+import Data.List (fromFoldable, uncons)
+-- | Julian Day.
+-- | The Modified Julian Day is a standard count of days, with zero being the day 1858-11-17.
+newtype JulianDay = JulianDay Int
+
+instance showJulianDay :: Show JulianDay where
+  show (JulianDay d) = "Julian Day " <> show d
+
+instance eqJulianDay:: Eq JulianDay where
+  eq (JulianDay x) (JulianDay y) = x == y
+
+instance ordJulianDay :: Ord JulianDay where
+  compare (JulianDay x) (JulianDay y) = compare x y
+
+addJDays :: Int -> JulianDay -> JulianDay
+addJDays x (JulianDay y) = JulianDay (x + y)
+
+diffJDays :: JulianDay -> JulianDay -> Int
+diffJDays (JulianDay x) (JulianDay y) = x - y
+
+-- | convert to ISO 8601 Ordinal Date format. First element of result is year (proleptic Gregoran calendar),
+-- second is the day of the year, with 1 for Jan 1, and 365 (or 366 in leap years) for Dec 31.
+toOrdinalDate :: JulianDay -> Tuple Int Int
+toOrdinalDate (JulianDay jday) = Tuple year yd where
+    a = jday + 678575
+    quadcent = div a 146097
+    b = mod a 146097
+    cent = min (div b 36524) 3
+    c = b - (cent * 36524)
+    quad = div c 1461
+    d = mod c 1461
+    y = min (div d 365) 3
+    yd = d - (y * 365) + 1
+    year = quadcent * 400 + cent * 100 + quad * 4 + y + 1
+
+-- | convert day of year in the Gregorian or Julian calendars to month and day.
+-- First arg is leap year flag
+dayOfYearToMonthAndDay :: Boolean -> Int -> Tuple Int Int
+dayOfYearToMonthAndDay isLeap yd = findMonthDay (monthLengths isLeap) (clip 1 (if isLeap then 366 else 365) yd)
+
+findMonthDay :: Array Int -> Int -> Tuple Int Int
+findMonthDay (n:ns) yd | yd > n = (\(m,d) -> (m + 1,d)) (findMonthDay ns (yd - n))
+findMonthDay _ yd = (1,yd)
+
+monthLengths :: Boolean -> Array Int
+monthLengths isleap =
+    [31,if isleap then 29 else 28,31,30,31,30,31,31,30,31,30,31]
+    --J        F                   M  A  M  J  J  A  S  O  N  D
+
+clip :: (Ord t) => t -> t -> t -> t
+clip a _ x | x < a = a
+clip _ b x | x > b = b
+clip _ _ x = x
+
+
+
+
 
 -- | Date Math
 withJSDateMethodInt :: String -> Date -> Int
@@ -59,8 +119,8 @@ prettyDate d = go getDay getMonth getDate getYear
 addDays :: Int -> Date -> Date
 addDays n = withEpochMS $ add (daysToMS n)
 
-subDays :: Int -> Date -> Date
-subDays n = withEpochMS $ flip sub (daysToMS n)
+subtractDays :: Int -> Date -> Date
+subtractDays n = withEpochMS $ flip sub (daysToMS n)
 
 withEpochMS :: (Milliseconds -> Milliseconds) -> Date -> Date
 withEpochMS f d = fromMaybe d <<< fromEpochMilliseconds <<< f <<< toEpochMilliseconds $ d
@@ -105,7 +165,6 @@ asMonth n = fromMaybe January <<< monthToEnum <<< (`mod` 12) <<< (`sub` 1) $ abs
 
 asDayOfMonth :: Int -> Month -> Year -> DayOfMonth
 asDayOfMonth n m y = DayOfMonth <<< (`mod` (daysInMonth y m)) <<< absInt $ n
-
 
 absInt :: Int -> Int
 absInt n | n < 0     = n * (-1)
