@@ -148,6 +148,9 @@ instance ordMillisecondOfSecond :: Ord MillisecondOfSecond where
 -- | A quantity of milliseconds (not necessarily a value between 0 and 1000).
 newtype Milliseconds = Milliseconds Number
 
+ms :: Number -> Milliseconds
+ms = Milliseconds
+
 instance eqMilliseconds :: Eq Milliseconds where
   eq (Milliseconds x) (Milliseconds y) = x == y
 
