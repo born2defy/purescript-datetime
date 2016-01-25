@@ -21,13 +21,12 @@ import Data.Function (on)
 
 escrows :: GregorianDate -> Int
 escrows d = case d of
-  _ | pmtMonth < November -> 14 - (November `subMonth` pmtMonth)
+  _ | pmtMonth <  November -> 14 - (November `subMonth` pmtMonth)
     | pmtMonth == November -> 14
-    | otherwise -> 2
+    | otherwise            -> 2
   where
   subMonth = sub `on` fromEnum
-  pmtMonth = asMonth $ (fromEnum month) + 3
-  month = d.month
+  pmtMonth = asMonth $ (fromEnum d.month) + 2
 
 -- | Julian Day.
 -- | The Modified Julian Day is a standard count of days, with zero being the day 1858-11-17.
