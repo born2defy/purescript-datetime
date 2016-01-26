@@ -1,5 +1,211 @@
 ## Module Data.Time
 
+#### `Year`
+
+``` purescript
+newtype Year
+  = Year Int
+```
+
+##### Instances
+``` purescript
+Show Year
+Eq Year
+Ord Year
+Semiring Year
+Ring Year
+Clamped Year
+```
+
+#### `runYear`
+
+``` purescript
+runYear :: Year -> Int
+```
+
+Extract an Int from a Year
+
+#### `asYear`
+
+``` purescript
+asYear :: Int -> Year
+```
+
+Smart constructor for year
+
+#### `isLeapYear`
+
+``` purescript
+isLeapYear :: Year -> Boolean
+```
+
+Checks to see if a given year is a leap year
+
+#### `Month`
+
+``` purescript
+data Month
+  = January
+  | February
+  | March
+  | April
+  | May
+  | June
+  | July
+  | August
+  | September
+  | October
+  | November
+  | December
+```
+
+##### Instances
+``` purescript
+Eq Month
+Ord Month
+Bounded Month
+BoundedOrd Month
+Show Month
+Enum Month
+```
+
+#### `monthToEnum`
+
+``` purescript
+monthToEnum :: Int -> Maybe Month
+```
+
+#### `monthFromEnum`
+
+``` purescript
+monthFromEnum :: Month -> Int
+```
+
+#### `asMonth`
+
+``` purescript
+asMonth :: Int -> Month
+```
+
+Smart Constructor
+
+#### `daysInMonth`
+
+``` purescript
+daysInMonth :: Boolean -> Month -> Int
+```
+
+Calculates the total days in a given month based on year
+
+#### `DayOfMonth`
+
+``` purescript
+newtype DayOfMonth
+  = DayOfMonth Int
+```
+
+##### Instances
+``` purescript
+Eq DayOfMonth
+Ord DayOfMonth
+Show DayOfMonth
+```
+
+#### `runDayOfMonth`
+
+``` purescript
+runDayOfMonth :: DayOfMonth -> Int
+```
+
+Extract an Int from a DayOfMonth
+
+#### `asDayOfMonth`
+
+``` purescript
+asDayOfMonth :: Int -> Month -> Year -> DayOfMonth
+```
+
+Smart constrcutor for DayOfMonth
+
+#### `DayOfWeek`
+
+``` purescript
+data DayOfWeek
+  = Sunday
+  | Monday
+  | Tuesday
+  | Wednesday
+  | Thursday
+  | Friday
+  | Saturday
+```
+
+##### Instances
+``` purescript
+Eq DayOfWeek
+Ord DayOfWeek
+Bounded DayOfWeek
+BoundedOrd DayOfWeek
+Show DayOfWeek
+Enum DayOfWeek
+```
+
+#### `dayOfWeekToEnum`
+
+``` purescript
+dayOfWeekToEnum :: Int -> Maybe DayOfWeek
+```
+
+#### `dayOfWeekFromEnum`
+
+``` purescript
+dayOfWeekFromEnum :: DayOfWeek -> Int
+```
+
+#### `asDayOfWeek`
+
+``` purescript
+asDayOfWeek :: Int -> DayOfWeek
+```
+
+Smart Constructor
+
+#### `Days`
+
+``` purescript
+newtype Days
+  = Days Number
+```
+
+##### Instances
+``` purescript
+Show Days
+Eq Days
+Ord Days
+Semiring Days
+Ring Days
+ModuloSemiring Days
+DivisionRing Days
+Num Days
+TimeValue Days
+```
+
+#### `runDays`
+
+``` purescript
+runDays :: Days -> Number
+```
+
+Extract a number from a Day
+
+#### `days`
+
+``` purescript
+days :: Number -> Days
+```
+
+Smart constructor
+
 #### `HourOfDay`
 
 ``` purescript
@@ -7,14 +213,21 @@ newtype HourOfDay
   = HourOfDay Int
 ```
 
-An hour component from a time value. Should fall between 0 and 23
-inclusive.
-
 ##### Instances
 ``` purescript
-instance eqHourOfDay :: Eq HourOfDay
-instance ordHourOfDay :: Ord HourOfDay
+Show HourOfDay
+Clamped HourOfDay
+Eq HourOfDay
+Ord HourOfDay
 ```
+
+#### `asHourOfDay`
+
+``` purescript
+asHourOfDay :: Int -> HourOfDay
+```
+
+Smart Constructor
 
 #### `Hours`
 
@@ -23,20 +236,26 @@ newtype Hours
   = Hours Number
 ```
 
-A quantity of hours (not necessarily a value between 0 and 23).
-
 ##### Instances
 ``` purescript
-instance eqHours :: Eq Hours
-instance ordHours :: Ord Hours
-instance semiringHours :: Semiring Hours
-instance ringHours :: Ring Hours
-instance moduloSemiringHours :: ModuloSemiring Hours
-instance divisionRingHours :: DivisionRing Hours
-instance numHours :: Num Hours
-instance showHours :: Show Hours
-instance timeValueHours :: TimeValue Hours
+Show Hours
+Eq Hours
+Ord Hours
+Semiring Hours
+Ring Hours
+ModuloSemiring Hours
+DivisionRing Hours
+Num Hours
+TimeValue Hours
 ```
+
+#### `hours`
+
+``` purescript
+hours :: Number -> Hours
+```
+
+Smart constructor
 
 #### `MinuteOfHour`
 
@@ -45,14 +264,21 @@ newtype MinuteOfHour
   = MinuteOfHour Int
 ```
 
-A minute component from a time value. Should fall between 0 and 59
-inclusive.
-
 ##### Instances
 ``` purescript
-instance eqMinuteOfHour :: Eq MinuteOfHour
-instance ordMinuteOfHour :: Ord MinuteOfHour
+Show MinuteOfHour
+Clamped MinuteOfHour
+Eq MinuteOfHour
+Ord MinuteOfHour
 ```
+
+#### `asMinuteOfHour`
+
+``` purescript
+asMinuteOfHour :: Int -> MinuteOfHour
+```
+
+Smart Constructor
 
 #### `Minutes`
 
@@ -61,20 +287,26 @@ newtype Minutes
   = Minutes Number
 ```
 
-A quantity of minutes (not necessarily a value between 0 and 60).
-
 ##### Instances
 ``` purescript
-instance eqMinutes :: Eq Minutes
-instance ordMinutes :: Ord Minutes
-instance semiringMinutes :: Semiring Minutes
-instance ringMinutes :: Ring Minutes
-instance moduloSemiringMinutes :: ModuloSemiring Minutes
-instance divisionRingMinutes :: DivisionRing Minutes
-instance numMinutes :: Num Minutes
-instance showMinutes :: Show Minutes
-instance timeValueMinutes :: TimeValue Minutes
+Show Minutes
+Eq Minutes
+Ord Minutes
+Semiring Minutes
+Ring Minutes
+ModuloSemiring Minutes
+DivisionRing Minutes
+Num Minutes
+TimeValue Minutes
 ```
+
+#### `minutes`
+
+``` purescript
+minutes :: Number -> Minutes
+```
+
+Smart Constructor
 
 #### `SecondOfMinute`
 
@@ -83,14 +315,21 @@ newtype SecondOfMinute
   = SecondOfMinute Int
 ```
 
-A second component from a time value. Should fall between 0 and 59
-inclusive.
-
 ##### Instances
 ``` purescript
-instance eqSecondOfMinute :: Eq SecondOfMinute
-instance ordSecondOfMinute :: Ord SecondOfMinute
+Show SecondOfMinute
+Clamped SecondOfMinute
+Eq SecondOfMinute
+Ord SecondOfMinute
 ```
+
+#### `asSecondOfMinute`
+
+``` purescript
+asSecondOfMinute :: Int -> SecondOfMinute
+```
+
+Smart Constructor
 
 #### `Seconds`
 
@@ -99,20 +338,26 @@ newtype Seconds
   = Seconds Number
 ```
 
-A quantity of seconds (not necessarily a value between 0 and 60).
-
 ##### Instances
 ``` purescript
-instance eqSeconds :: Eq Seconds
-instance ordSeconds :: Ord Seconds
-instance semiringSeconds :: Semiring Seconds
-instance ringSeconds :: Ring Seconds
-instance moduloSemiringSeconds :: ModuloSemiring Seconds
-instance divisionRingSeconds :: DivisionRing Seconds
-instance numSeconds :: Num Seconds
-instance showSeconds :: Show Seconds
-instance timeValueSeconds :: TimeValue Seconds
+Show Seconds
+Eq Seconds
+Ord Seconds
+Semiring Seconds
+Ring Seconds
+ModuloSemiring Seconds
+DivisionRing Seconds
+Num Seconds
+TimeValue Seconds
 ```
+
+#### `seconds`
+
+``` purescript
+seconds :: Number -> Seconds
+```
+
+Smart constructor
 
 #### `MillisecondOfSecond`
 
@@ -121,14 +366,21 @@ newtype MillisecondOfSecond
   = MillisecondOfSecond Int
 ```
 
-A millisecond component from a time value. Should fall between 0 and 999
-inclusive.
-
 ##### Instances
 ``` purescript
-instance eqMillisecondOfSecond :: Eq MillisecondOfSecond
-instance ordMillisecondOfSecond :: Ord MillisecondOfSecond
+Show MillisecondOfSecond
+Clamped MillisecondOfSecond
+Eq MillisecondOfSecond
+Ord MillisecondOfSecond
 ```
+
+#### `asMillisecondOfSecond`
+
+``` purescript
+asMillisecondOfSecond :: Int -> MillisecondOfSecond
+```
+
+Smart Constructor
 
 #### `Milliseconds`
 
@@ -137,29 +389,37 @@ newtype Milliseconds
   = Milliseconds Number
 ```
 
-A quantity of milliseconds (not necessarily a value between 0 and 1000).
-
 ##### Instances
 ``` purescript
-instance eqMilliseconds :: Eq Milliseconds
-instance ordMilliseconds :: Ord Milliseconds
-instance semiringMilliseconds :: Semiring Milliseconds
-instance ringMilliseconds :: Ring Milliseconds
-instance moduloSemiringMilliseconds :: ModuloSemiring Milliseconds
-instance divisionRingMilliseconds :: DivisionRing Milliseconds
-instance numMilliseconds :: Num Milliseconds
-instance showMilliseconds :: Show Milliseconds
-instance timeValueMilliseconds :: TimeValue Milliseconds
+Eq Milliseconds
+Ord Milliseconds
+Semiring Milliseconds
+Ring Milliseconds
+ModuloSemiring Milliseconds
+DivisionRing Milliseconds
+Num Milliseconds
+Show Milliseconds
+TimeValue Milliseconds
 ```
+
+#### `ms`
+
+``` purescript
+ms :: Number -> Milliseconds
+```
+
+Smart constructor
 
 #### `TimeValue`
 
 ``` purescript
 class TimeValue a where
+  toDays :: a -> Days
   toHours :: a -> Hours
   toMinutes :: a -> Minutes
   toSeconds :: a -> Seconds
   toMilliseconds :: a -> Milliseconds
+  fromDays :: Days -> a
   fromHours :: Hours -> a
   fromMinutes :: Minutes -> a
   fromSeconds :: Seconds -> a
@@ -168,10 +428,11 @@ class TimeValue a where
 
 ##### Instances
 ``` purescript
-instance timeValueHours :: TimeValue Hours
-instance timeValueMinutes :: TimeValue Minutes
-instance timeValueSeconds :: TimeValue Seconds
-instance timeValueMilliseconds :: TimeValue Milliseconds
+TimeValue Days
+TimeValue Hours
+TimeValue Minutes
+TimeValue Seconds
+TimeValue Milliseconds
 ```
 
 
