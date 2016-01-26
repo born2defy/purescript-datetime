@@ -3,7 +3,7 @@ module Data.Date.JulianGregorian (
   , GregorianDate(), julianToGregorian, showGregorianDate, dayOfYearToMonthAndDay, findMonthDay
   , monthLengths, gregorianToDate, mkGregorianDate, gregorianToJulian, julianToDate, monthAndDayToDayOfYear, runMS
   , clip, prettyJulian, dateToGregorian, diffGDates
-  , escrows
+  , calcTaxEscrows
   ) where
 
 import Prelude
@@ -19,8 +19,8 @@ import Control.Monad.Eff (Eff())
 import Data.Enum (fromEnum)
 import Data.Function (on)
 
-escrows :: GregorianDate -> Int
-escrows d = case d of
+calcTaxEscrows :: GregorianDate -> Int
+calcTaxEscrows d = case d of
   _ | pmtMonth <  November -> 14 - (November `subMonth` pmtMonth)
     | pmtMonth == November -> 14
     | otherwise            -> 2
