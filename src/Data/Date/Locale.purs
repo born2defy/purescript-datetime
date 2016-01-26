@@ -16,7 +16,7 @@ module Data.Date.Locale
   ) where
 
 import Control.Monad.Eff (Eff())
-import Data.Date
+import Data.Date.NativeDate
 import Data.Enum (fromEnum, toEnum)
 import Data.Function (Fn2(), runFn2, Fn7(), runFn7)
 import Data.Maybe (Maybe())
