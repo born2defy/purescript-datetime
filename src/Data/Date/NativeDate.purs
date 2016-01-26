@@ -8,7 +8,8 @@ module Data.Date.NativeDate
   , prettyDate
   , setDate, setMonth
   , beginningOfMonth, endOfMonth
-  , getDay, getMonth, getYear, getDate
+  , getDayOfMonth, getDay, getMonth, getYear
+  , getDateString
   , Now()
   , now, getCurrentYear, getCurrentMonth, getCurrentDay
   , nowEpochMilliseconds
@@ -72,9 +73,13 @@ beginningOfMonth = setDate 1
 getDay :: Date -> DayOfWeek
 getDay = fromMaybe Sunday <<< dayOfWeekToEnum <<< withJSDateMethodInt "getDay"
 
--- | Gets the date of a Date using the native JavaScript Date method
-getDate :: Date -> Int
-getDate = withJSDateMethodInt "getDate"
+-- | Gets the day of the month using the native JavaScript getDate method
+getDayOfMonth :: Date -> Int
+getDayOfMonth = withJSDateMethodInt "getDate"
+
+-- | Get the date as a string using the native JavaScript toString method
+getDateString :: Date -> String
+getDateString = withJSDateMethodString "toString"
 
 -- | Gets the Month of a Date using the native JavaScript Date method
 getMonth :: Date -> Month
@@ -86,7 +91,7 @@ getYear = Year <<< withJSDateMethodInt "getFullYear"
 
 -- | Pretty prints a Date
 prettyDate :: Date -> String
-prettyDate d = go getDay getMonth getDate getYear
+prettyDate d = go getDay getMonth getDayOfMonth getYear
   where
   go day month date year = fmt day <> ", " <> fmt month <> " " <> fmt date <> ", " <> fmtYr year
   fmt :: forall a. (Show a) => (Date -> a) -> String
@@ -96,6 +101,10 @@ prettyDate d = go getDay getMonth getDate getYear
 -- | Runs native JavaScript Date methods that return Ints
 withJSDateMethodInt :: String -> Date -> Int
 withJSDateMethodInt s = runFn2 jsDateMethod s <<< toJSDate
+
+-- | Runs native JavaScript Date methods that return a String
+withJSDateMethodString :: String -> Date -> String
+withJSDateMethodString s = runFn2 jsDateMethod s <<< toJSDate
 
 -- | Runs native JavaScript Date methods that return MS
 withJSDateMethodMS :: String -> Date -> Int -> Milliseconds

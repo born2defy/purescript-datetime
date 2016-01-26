@@ -285,6 +285,10 @@ instance divisionRingDays :: DivisionRing Days
 
 instance numDays :: Num Days
 
+-- | Extract a number from a Day
+runDays :: Days -> Number
+runDays (Days x) = x
+
 -- | Smart constructor
 days :: Number -> Days
 days = Days
@@ -535,6 +539,18 @@ class TimeValue a where
   fromMinutes :: Minutes -> a
   fromSeconds :: Seconds -> a
   fromMilliseconds :: Milliseconds -> a
+
+instance timeValueDays :: TimeValue Days where
+  toDays n = n
+  toHours (Days n) = Hours (n * 24.0)
+  toMinutes (Days n) = Minutes (n * 1440.0)
+  toSeconds (Days n) = Seconds (n * 86400.0)
+  toMilliseconds (Days n) = Milliseconds (n * 86400000.0)
+  fromDays n = n
+  fromHours (Hours n) = Days (n / 24.0)
+  fromMinutes (Minutes n) = Days (n / 1440.0)
+  fromSeconds (Seconds n) = Days (n / 86400.0)
+  fromMilliseconds (Milliseconds n) = Days (n / 86400000.0)
 
 instance timeValueHours :: TimeValue Hours where
   toDays (Hours n) = Days (n / 24.0)

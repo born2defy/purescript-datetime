@@ -94,9 +94,6 @@ gregorianToJulianTime :: GregorianDate -> JulianTime
 gregorianToJulianTime gdate = curry ordinalToJulianTime (runYear gdate.year) (monthAndDayToDayOfYear (isLeapYear gdate.year) ((fromEnum gdate.month) + 1) (runDayOfMonth gdate.day))
 
 
-
-
-
 -- | Julian Day.
 -- | The Modified Julian Day is a standard count of days, with zero being the day 1858-11-17.
 -- | The plan is to start with Gregorian since it is easy to enter, then convert to Julian for any date calculations.
@@ -223,21 +220,26 @@ gregorianToDate d = do
 dateToGregorian :: Date -> GregorianDate
 dateToGregorian = julianToGregorian <<< dateToJulian
 
+dateToJulianTime :: Date -> JulianTime
+dateToJulianTime = JulianTime <<< (+ 40587.0) <<< runDays <<< toDays <<< toEpochMilliseconds
+
+julianTimeToDate :: JulianTime -> Maybe Date
+julianTimeToDate = fromEpochMilliseconds <<< toMilliseconds <<< days <<< (`sub` 40587.0) <<< runJulianTime
 
 dateToJulian :: Date -> JulianDay
-dateToJulian = JulianDay <<< (+ 40587) <<< msToDay <<< runMS <<< toEpochMilliseconds
+dateToJulian = JulianDay <<< (+ 40587) <<< msToDayInt <<< runMS <<< toEpochMilliseconds
 
 julianToDate :: JulianDay -> Maybe Date
-julianToDate = fromEpochMilliseconds <<< Milliseconds <<< dayToMS <<< (`sub` 40587) <<< runJulianDay
+julianToDate = fromEpochMilliseconds <<< Milliseconds <<< dayIntToMS <<< (`sub` 40587) <<< runJulianDay
 
 prettyJulian :: JulianDay -> String
 prettyJulian = showGregorianDate <<<julianToGregorian
 
-msToDay :: Number -> Int
-msToDay = floor <<< (/ 24.0) <<< (/ 3600000.0)
+msToDayInt :: Number -> Int
+msToDayInt = floor <<< (/ 24.0) <<< (/ 3600000.0)
 
-dayToMS :: Int -> Number
-dayToMS = toNumber <<< (* 3600000) <<< (* 24)
+dayIntToMS :: Int -> Number
+dayIntToMS = toNumber <<< (* 3600000) <<< (* 24)
 
 runMS :: Milliseconds -> Number
 runMS (Milliseconds x) = x
