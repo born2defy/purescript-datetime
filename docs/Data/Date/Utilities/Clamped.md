@@ -7,4 +7,6 @@ class Clamped a where
   clamp :: a -> a
 ```
 
+Takes a value and sanitizes it
+
 

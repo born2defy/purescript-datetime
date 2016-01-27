@@ -12,6 +12,8 @@ calcTaxEscrows :: GregorianDate -> Int
 monthAsInt :: Month -> Int
 ```
 
+Converts an Month into its traditional numeric form
+
 #### `JulianTime`
 
 ``` purescript
@@ -78,58 +80,85 @@ julianTimeToGregorian :: JulianTime -> GregorianDate
 gregorianToJulianTime :: GregorianDate -> JulianTime
 ```
 
-#### `JulianDay`
-
-``` purescript
-newtype JulianDay
-  = JulianDay Int
-```
-
-Julian Day.
-The Modified Julian Day is a standard count of days, with zero being the day 1858-11-17.
-The plan is to start with Gregorian since it is easy to enter, then convert to Julian for any date calculations.
-
-##### Instances
-``` purescript
-Show JulianDay
-Eq JulianDay
-Ord JulianDay
-```
-
-#### `runJulianDay`
-
-``` purescript
-runJulianDay :: JulianDay -> Int
-```
-
-#### `addJDays`
-
-``` purescript
-addJDays :: Int -> JulianDay -> JulianDay
-```
-
-#### `diffJDays`
-
-``` purescript
-diffJDays :: JulianDay -> JulianDay -> Int
-```
-
 #### `diffGDates`
 
 ``` purescript
 diffGDates :: GregorianDate -> GregorianDate -> Int
 ```
 
-#### `julianToOrdinal`
+#### `showJulianTimeAsDateAndTime`
 
 ``` purescript
-julianToOrdinal :: JulianDay -> Tuple Int Int
+showJulianTimeAsDateAndTime :: TimeZoneOffset -> JulianTime -> String
 ```
 
-#### `ordinalToJulian`
+#### `TimeOfDay`
 
 ``` purescript
-ordinalToJulian :: Tuple Int Int -> JulianDay
+type TimeOfDay = { hours :: HourOfDay, minutes :: MinuteOfHour, seconds :: SecondOfMinute, milliseconds :: MillisecondOfSecond }
+```
+
+A type representing the time of day
+
+#### `showTimeOfDay`
+
+``` purescript
+showTimeOfDay :: TimeOfDay -> String
+```
+
+#### `TimeZoneOffset`
+
+``` purescript
+type TimeZoneOffset = Int
+```
+
+#### `toTimeOfDay`
+
+``` purescript
+toTimeOfDay :: TimeZoneOffset -> Days -> TimeOfDay
+```
+
+Takes a partial day and converts it into a time of day
+
+#### `AMPM`
+
+``` purescript
+data AMPM
+  = AM
+  | PM
+```
+
+AM or PM
+
+##### Instances
+``` purescript
+Show AMPM
+```
+
+#### `TimeOfDayString`
+
+``` purescript
+type TimeOfDayString = { hoursStr :: String, minutesStr :: String, secondsStr :: String, millisecondsStr :: String }
+```
+
+A type for displaying the time of day
+
+#### `TimeStdFmt`
+
+``` purescript
+type TimeStdFmt = { time :: TimeOfDayString, ampm :: String }
+```
+
+#### `timeToStdFmt`
+
+``` purescript
+timeToStdFmt :: TimeOfDay -> TimeStdFmt
+```
+
+#### `showTimeOfDayStd`
+
+``` purescript
+showTimeOfDayStd :: TimeStdFmt -> String
 ```
 
 #### `GregorianDate`
@@ -144,22 +173,10 @@ type GregorianDate = { month :: Month, day :: DayOfMonth, year :: Year }
 showGregorianDate :: GregorianDate -> String
 ```
 
-#### `julianToGregorian`
-
-``` purescript
-julianToGregorian :: JulianDay -> GregorianDate
-```
-
 #### `mkGregorianDate`
 
 ``` purescript
 mkGregorianDate :: Int -> Int -> Int -> GregorianDate
-```
-
-#### `gregorianToJulian`
-
-``` purescript
-gregorianToJulian :: GregorianDate -> JulianDay
 ```
 
 #### `monthAndDayToDayOfYear`
@@ -216,22 +233,10 @@ dateToJulianTime :: Date -> JulianTime
 julianTimeToDate :: JulianTime -> Maybe Date
 ```
 
-#### `dateToJulian`
+#### `prettyJulianTime`
 
 ``` purescript
-dateToJulian :: Date -> JulianDay
-```
-
-#### `julianToDate`
-
-``` purescript
-julianToDate :: JulianDay -> Maybe Date
-```
-
-#### `prettyJulian`
-
-``` purescript
-prettyJulian :: JulianDay -> String
+prettyJulianTime :: JulianTime -> String
 ```
 
 #### `msToDayInt`

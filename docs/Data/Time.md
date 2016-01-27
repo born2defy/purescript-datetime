@@ -182,6 +182,7 @@ newtype Days
 Show Days
 Eq Days
 Ord Days
+HasDecimal Days
 Semiring Days
 Ring Days
 ModuloSemiring Days
@@ -190,21 +191,21 @@ Num Days
 TimeValue Days
 ```
 
+#### `asDays`
+
+``` purescript
+asDays :: Number -> Days
+```
+
+Smart constructor
+
 #### `runDays`
 
 ``` purescript
 runDays :: Days -> Number
 ```
 
-Extract a number from a Day
-
-#### `days`
-
-``` purescript
-days :: Number -> Days
-```
-
-Smart constructor
+Extractor
 
 #### `HourOfDay`
 
@@ -229,6 +230,14 @@ asHourOfDay :: Int -> HourOfDay
 
 Smart Constructor
 
+#### `runHourOfDay`
+
+``` purescript
+runHourOfDay :: HourOfDay -> Int
+```
+
+Extractor
+
 #### `Hours`
 
 ``` purescript
@@ -241,6 +250,7 @@ newtype Hours
 Show Hours
 Eq Hours
 Ord Hours
+HasDecimal Hours
 Semiring Hours
 Ring Hours
 ModuloSemiring Hours
@@ -249,13 +259,21 @@ Num Hours
 TimeValue Hours
 ```
 
-#### `hours`
+#### `asHours`
 
 ``` purescript
-hours :: Number -> Hours
+asHours :: Number -> Hours
 ```
 
 Smart constructor
+
+#### `runHours`
+
+``` purescript
+runHours :: Hours -> Number
+```
+
+Extractor
 
 #### `MinuteOfHour`
 
@@ -280,6 +298,14 @@ asMinuteOfHour :: Int -> MinuteOfHour
 
 Smart Constructor
 
+#### `runMinuteOfHour`
+
+``` purescript
+runMinuteOfHour :: MinuteOfHour -> Int
+```
+
+Extractor
+
 #### `Minutes`
 
 ``` purescript
@@ -292,6 +318,7 @@ newtype Minutes
 Show Minutes
 Eq Minutes
 Ord Minutes
+HasDecimal Minutes
 Semiring Minutes
 Ring Minutes
 ModuloSemiring Minutes
@@ -300,13 +327,21 @@ Num Minutes
 TimeValue Minutes
 ```
 
-#### `minutes`
+#### `asMinutes`
 
 ``` purescript
-minutes :: Number -> Minutes
+asMinutes :: Number -> Minutes
 ```
 
 Smart Constructor
+
+#### `runMinutes`
+
+``` purescript
+runMinutes :: Minutes -> Number
+```
+
+Extractor
 
 #### `SecondOfMinute`
 
@@ -331,6 +366,14 @@ asSecondOfMinute :: Int -> SecondOfMinute
 
 Smart Constructor
 
+#### `runSecondOfMinute`
+
+``` purescript
+runSecondOfMinute :: SecondOfMinute -> Int
+```
+
+Extractor
+
 #### `Seconds`
 
 ``` purescript
@@ -343,6 +386,7 @@ newtype Seconds
 Show Seconds
 Eq Seconds
 Ord Seconds
+HasDecimal Seconds
 Semiring Seconds
 Ring Seconds
 ModuloSemiring Seconds
@@ -351,13 +395,21 @@ Num Seconds
 TimeValue Seconds
 ```
 
-#### `seconds`
+#### `asSeconds`
 
 ``` purescript
-seconds :: Number -> Seconds
+asSeconds :: Number -> Seconds
 ```
 
 Smart constructor
+
+#### `runSeconds`
+
+``` purescript
+runSeconds :: Seconds -> Number
+```
+
+Extractor
 
 #### `MillisecondOfSecond`
 
@@ -382,6 +434,14 @@ asMillisecondOfSecond :: Int -> MillisecondOfSecond
 
 Smart Constructor
 
+#### `runMillisecondOfSecond`
+
+``` purescript
+runMillisecondOfSecond :: MillisecondOfSecond -> Int
+```
+
+Extractor
+
 #### `Milliseconds`
 
 ``` purescript
@@ -393,6 +453,7 @@ newtype Milliseconds
 ``` purescript
 Eq Milliseconds
 Ord Milliseconds
+HasDecimal Milliseconds
 Semiring Milliseconds
 Ring Milliseconds
 ModuloSemiring Milliseconds
@@ -402,13 +463,21 @@ Show Milliseconds
 TimeValue Milliseconds
 ```
 
-#### `ms`
+#### `asMilliseconds`
 
 ``` purescript
-ms :: Number -> Milliseconds
+asMilliseconds :: Number -> Milliseconds
 ```
 
 Smart constructor
+
+#### `runMilliseconds`
+
+``` purescript
+runMilliseconds :: Milliseconds -> Number
+```
+
+Extractor
 
 #### `TimeValue`
 
