@@ -12,6 +12,8 @@ import Data.List (List(), fromFoldable, uncons)
 import Control.Monad.Eff (Eff())
 import Data.Enum (fromEnum)
 import Data.Function (on)
+import Data.Foldable (fold)
+import Data.Date.Utilities.HasDecimal (decPart, getInt, getDecPart)
 
 calcTaxEscrows :: GregorianDate -> Int
 calcTaxEscrows d = case d of
@@ -22,6 +24,7 @@ calcTaxEscrows d = case d of
   subMonth = sub `on` fromEnum
   pmtMonth = asMonth $ (monthAsInt d.month) + 1
 
+-- | Converts an Month into its traditional numeric form
 monthAsInt :: Month -> Int
 monthAsInt = (+ 1) <<< fromEnum
 
@@ -41,6 +44,8 @@ instance eqJulianTime:: Eq JulianTime where
 
 instance ordJulianTime :: Ord JulianTime where
   compare (JulianTime x) (JulianTime y) = compare x y
+
+-- getTimeOfDay :: JulianTime ->
 
 addDaysJT :: Int -> JulianTime -> JulianTime
 addDaysJT x (JulianTime y) = JulianTime (toNumber x + y)
@@ -93,56 +98,94 @@ julianTimeToGregorian time =
 gregorianToJulianTime :: GregorianDate -> JulianTime
 gregorianToJulianTime gdate = curry ordinalToJulianTime (runYear gdate.year) (monthAndDayToDayOfYear (isLeapYear gdate.year) ((fromEnum gdate.month) + 1) (runDayOfMonth gdate.day))
 
-
--- | Julian Day.
--- | The Modified Julian Day is a standard count of days, with zero being the day 1858-11-17.
--- | The plan is to start with Gregorian since it is easy to enter, then convert to Julian for any date calculations.
-newtype JulianDay = JulianDay Int
-
-runJulianDay :: JulianDay -> Int
-runJulianDay (JulianDay d) = d
-
-instance showJulianDay :: Show JulianDay where
-  show (JulianDay d) = "Julian Day " <> show d
-
-instance eqJulianDay:: Eq JulianDay where
-  eq (JulianDay x) (JulianDay y) = x == y
-
-instance ordJulianDay :: Ord JulianDay where
-  compare (JulianDay x) (JulianDay y) = compare x y
-
-addJDays :: Int -> JulianDay -> JulianDay
-addJDays x (JulianDay y) = JulianDay (x + y)
-
-diffJDays :: JulianDay -> JulianDay -> Int
-diffJDays (JulianDay x) (JulianDay y) = x - y
-
 diffGDates :: GregorianDate -> GregorianDate -> Int
-diffGDates x y =  (diffJDays `on` gregorianToJulian) x y
+diffGDates x y =  (diffInDays `on` gregorianToJulianTime) x y
 
--- | convert to ISO 8601 Ordinal Date format. First element of result is year (proleptic Gregoran calendar),
--- second is the day of the year, with 1 for Jan 1, and 365 (or 366 in leap years) for Dec 31.
-julianToOrdinal :: JulianDay -> Tuple Int Int
-julianToOrdinal (JulianDay jday) = Tuple year yd
+showJulianTimeAsDateAndTime :: TimeZoneOffset -> JulianTime -> String
+showJulianTimeAsDateAndTime offset j = showDate j <> " " <> showTime j
   where
-  a = jday + 678575
-  quadcent = div a 146097
-  b = mod a 146097
-  cent = min (div b 36524) 3
-  c = b - (cent * 36524)
-  quad = div c 1461
-  d = mod c 1461
-  y = min (div d 365) 3
-  yd = d - (y * 365) + 1
-  year = quadcent * 400 + cent * 100 + quad * 4 + y + 1
+  showDate = prettyJulianTime
+  showTime =
+    showTimeOfDayStd
+    <<< timeToStdFmt
+    <<< toTimeOfDay offset
+    <<< asDays
+    <<< getDecPart
+    <<< runJulianTime
 
--- | convert from ISO 8601 Ordinal Date format.
--- Invalid day numbers will be clipped to the correct range (1 to 365 or 366).
-ordinalToJulian :: Tuple Int Int -> JulianDay
-ordinalToJulian (Tuple year day) = JulianDay jday
+-- | A type representing the time of day
+type TimeOfDay
+  = { hours :: HourOfDay
+    , minutes :: MinuteOfHour
+    , seconds :: SecondOfMinute
+    , milliseconds :: MillisecondOfSecond
+    }
+
+showTimeOfDay :: TimeOfDay -> String
+showTimeOfDay s =
+  "{ hours: " <> show s.hours
+  <> ", minutes " <> show s.minutes
+  <> ", seconds" <> show s.seconds
+  <> ", milliseconds" <> show s.milliseconds
+  <> " }"
+
+type TimeZoneOffset = Int
+
+-- | Takes a partial day and converts it into a time of day
+toTimeOfDay :: TimeZoneOffset -> Days -> TimeOfDay
+toTimeOfDay offset d = { hours, minutes, seconds, milliseconds }
   where
-  y = year - 1
-  jday = (clip 1 (if isLeapYear (asYear year) then 366 else 365) day) + (365 * y) + (div y 4) - (div y 100) + (div y 400) - 678576
+  totHours     = toHours d + (asHours $ toNumber offset)
+  hours        = asHourOfDay           <<< getInt  $ totHours
+  totMins      = toMinutes             <<< decPart $ totHours
+  minutes      = asMinuteOfHour        <<< getInt  $ totMins
+  totSecs      = toSeconds             <<< decPart $ totMins
+  seconds      = asSecondOfMinute      <<< getInt  $ totSecs
+  totMsecs     = toMilliseconds        <<< decPart $ totSecs
+  milliseconds = asMillisecondOfSecond <<< getInt  $ totMsecs
+
+
+-- | AM or PM
+data AMPM = AM | PM
+
+instance showAMPM :: Show AMPM where
+  show AM = "AM"
+  show PM = "PM"
+
+-- | A type for displaying the time of day
+type TimeOfDayString
+  = { hoursStr        :: String
+    , minutesStr      :: String
+    , secondsStr      :: String
+    , millisecondsStr :: String
+    }
+
+-- A refined version of TimeOfDay which puts the time into std AM/PM format
+type TimeStdFmt
+  = { time :: TimeOfDayString
+    , ampm :: String
+    }
+
+timeToStdFmt :: TimeOfDay -> TimeStdFmt
+timeToStdFmt t =
+  let ampm = show $ if hrs < 12 then AM else PM
+      hours = if hrs > 12 then hrs - 12 else if hrs == 0 then 12 else hrs
+      hrs   = runHourOfDay t.hours
+      time = { hoursStr: show hours
+             , minutesStr: show $ runMinuteOfHour t.minutes
+             , secondsStr: show $ runSecondOfMinute t.seconds
+             , millisecondsStr: show $ runMillisecondOfSecond t.milliseconds
+             }
+  in  { time, ampm }
+
+showTimeOfDayStd :: TimeStdFmt -> String
+showTimeOfDayStd t = fold [ hrs,":",mins," ",ampm," ",secs,":",msecs ]
+  where
+  hrs = t.time.hoursStr
+  mins = t.time.minutesStr
+  ampm = t.ampm
+  secs = t.time.secondsStr
+  msecs = t.time.millisecondsStr
 
 
 type GregorianDate
@@ -157,28 +200,12 @@ showGregorianDate d =
   <> show (runDayOfMonth d.day) <> ", "
   <> show (runYear d.year)
 
-julianToGregorian :: JulianDay -> GregorianDate
-julianToGregorian jday =
-  case julianToOrdinal jday of
-    Tuple y d ->
-      let year = Year y
-          leap = isLeapYear year
-          mAndD = dayOfYearToMonthAndDay leap d
-          month = asMonth $ fst mAndD
-          day   = asDayOfMonth (snd mAndD) month year
-      in  { month, day, year }
-
 mkGregorianDate :: Int -> Int -> Int -> GregorianDate
 mkGregorianDate m d y = { month, day, year }
   where
   month = asMonth m
   year  = asYear y
   day   = asDayOfMonth d month year
-
--- | convert from proleptic Gregorian calendar. First argument is year, second month number (1-12), third day (1-31).
--- Invalid values will be clipped to the correct range, month first, then day.
-gregorianToJulian :: GregorianDate -> JulianDay
-gregorianToJulian gdate = curry ordinalToJulian (runYear gdate.year) (monthAndDayToDayOfYear (isLeapYear gdate.year) ((fromEnum gdate.month) + 1) (runDayOfMonth gdate.day))
 
 -- | convert month and day in the Gregorian or Julian calendars to day of year.
 -- First arg is leap year flag
@@ -218,22 +245,16 @@ gregorianToDate d = do
   return $ fromMaybe currentDate maybeDate
 
 dateToGregorian :: Date -> GregorianDate
-dateToGregorian = julianToGregorian <<< dateToJulian
+dateToGregorian = julianTimeToGregorian <<< dateToJulianTime
 
 dateToJulianTime :: Date -> JulianTime
 dateToJulianTime = JulianTime <<< (+ 40587.0) <<< runDays <<< toDays <<< toEpochMilliseconds
 
 julianTimeToDate :: JulianTime -> Maybe Date
-julianTimeToDate = fromEpochMilliseconds <<< toMilliseconds <<< days <<< (`sub` 40587.0) <<< runJulianTime
+julianTimeToDate = fromEpochMilliseconds <<< toMilliseconds <<< asDays <<< (`sub` 40587.0) <<< runJulianTime
 
-dateToJulian :: Date -> JulianDay
-dateToJulian = JulianDay <<< (+ 40587) <<< msToDayInt <<< runMS <<< toEpochMilliseconds
-
-julianToDate :: JulianDay -> Maybe Date
-julianToDate = fromEpochMilliseconds <<< Milliseconds <<< dayIntToMS <<< (`sub` 40587) <<< runJulianDay
-
-prettyJulian :: JulianDay -> String
-prettyJulian = showGregorianDate <<<julianToGregorian
+prettyJulianTime :: JulianTime -> String
+prettyJulianTime = showGregorianDate <<<julianTimeToGregorian
 
 msToDayInt :: Number -> Int
 msToDayInt = floor <<< (/ 24.0) <<< (/ 3600000.0)

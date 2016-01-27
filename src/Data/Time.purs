@@ -7,6 +7,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Time
 import Data.Int.Extensions (absInt)
 import Data.Date.Utilities.Clamped (Clamped, clamp)
+import Data.Date.Utilities.HasDecimal (HasDecimal, getDecPart, getIntPart)
 
 ------------------Years--------------------------
 -- | A year date component value.
@@ -268,6 +269,11 @@ instance eqDays :: Eq Days where
 instance ordDays :: Ord Days where
   compare (Days x) (Days y) = compare x y
 
+instance hasDecimalDays :: HasDecimal Days where
+  intPart (Days x) = Days (getIntPart x)
+  decPart (Days x) = Days (getDecPart x)
+  getNumber = runDays
+
 instance semiringDays :: Semiring Days where
   add (Days x) (Days y) = Days (x + y)
   mul (Days x) (Days y) = Days (x * y)
@@ -285,13 +291,14 @@ instance divisionRingDays :: DivisionRing Days
 
 instance numDays :: Num Days
 
--- | Extract a number from a Day
+-- | Smart constructor
+asDays :: Number -> Days
+asDays = Days
+
+-- | Extractor
 runDays :: Days -> Number
 runDays (Days x) = x
 
--- | Smart constructor
-days :: Number -> Days
-days = Days
 
 ------------------HourOfDay----------------------
 -- | An hour component from a time value. Should fall between 0 and 23
@@ -316,6 +323,11 @@ instance ordHourOfDay :: Ord HourOfDay where
 asHourOfDay :: Int -> HourOfDay
 asHourOfDay = clamp <<< HourOfDay
 
+-- | Extractor
+runHourOfDay :: HourOfDay -> Int
+runHourOfDay (HourOfDay x) = x
+
+
 --------------------Hours------------------------
 -- | A quantity of hours (not necessarily a value between 0 and 23).
 newtype Hours = Hours Number
@@ -328,6 +340,11 @@ instance eqHours :: Eq Hours where
 
 instance ordHours :: Ord Hours where
   compare (Hours x) (Hours y) = compare x y
+
+instance hasDecimalHours :: HasDecimal Hours where
+  intPart (Hours x) = Hours (getIntPart x)
+  decPart (Hours x) = Hours (getDecPart x)
+  getNumber = runHours
 
 instance semiringHours :: Semiring Hours where
   add (Hours x) (Hours y) = Hours (x + y)
@@ -347,8 +364,13 @@ instance divisionRingHours :: DivisionRing Hours
 instance numHours :: Num Hours
 
 -- | Smart constructor
-hours :: Number -> Hours
-hours = Hours
+asHours :: Number -> Hours
+asHours = Hours
+
+-- | Extractor
+runHours :: Hours -> Number
+runHours (Hours x) = x
+
 
 --------------------MinuteOfHour-----------------
 -- | A minute component from a time value. Should fall between 0 and 59
@@ -373,6 +395,10 @@ instance ordMinuteOfHour :: Ord MinuteOfHour where
 asMinuteOfHour :: Int -> MinuteOfHour
 asMinuteOfHour = clamp <<< MinuteOfHour
 
+-- | Extractor
+runMinuteOfHour :: MinuteOfHour -> Int
+runMinuteOfHour (MinuteOfHour x) = x
+
 
 --------------------Minutes----------------------
 -- | A quantity of minutes (not necessarily a value between 0 and 60).
@@ -386,6 +412,11 @@ instance eqMinutes :: Eq Minutes where
 
 instance ordMinutes :: Ord Minutes where
   compare (Minutes x) (Minutes y) = compare x y
+
+instance hasDecimalMinutes :: HasDecimal Minutes where
+  intPart (Minutes x) = Minutes (getIntPart x)
+  decPart (Minutes x) = Minutes (getDecPart x)
+  getNumber = runMinutes
 
 instance semiringMinutes :: Semiring Minutes where
   add (Minutes x) (Minutes y) = Minutes (x + y)
@@ -405,8 +436,12 @@ instance divisionRingMinutes :: DivisionRing Minutes
 instance numMinutes :: Num Minutes
 
 -- | Smart Constructor
-minutes :: Number -> Minutes
-minutes = Minutes
+asMinutes :: Number -> Minutes
+asMinutes = Minutes
+
+-- | Extractor
+runMinutes :: Minutes -> Number
+runMinutes (Minutes x) = x
 
 
 --------------------SecondOfMinute---------------
@@ -432,6 +467,10 @@ instance ordSecondOfMinute :: Ord SecondOfMinute where
 asSecondOfMinute :: Int -> SecondOfMinute
 asSecondOfMinute = clamp <<< SecondOfMinute
 
+-- | Extractor
+runSecondOfMinute :: SecondOfMinute -> Int
+runSecondOfMinute (SecondOfMinute x) = x
+
 
 --------------------Seconds------------------------
 -- | A quantity of seconds (not necessarily a value between 0 and 60).
@@ -445,6 +484,11 @@ instance eqSeconds :: Eq Seconds where
 
 instance ordSeconds :: Ord Seconds where
   compare (Seconds x) (Seconds y) = compare x y
+
+instance hasDecimalSeconds :: HasDecimal Seconds where
+  intPart (Seconds x) = Seconds (getIntPart x)
+  decPart (Seconds x) = Seconds (getDecPart x)
+  getNumber = runSeconds
 
 instance semiringSeconds :: Semiring Seconds where
   add (Seconds x) (Seconds y) = Seconds (x + y)
@@ -464,8 +508,12 @@ instance divisionRingSeconds :: DivisionRing Seconds
 instance numSeconds :: Num Seconds
 
 -- | Smart constructor
-seconds :: Number -> Seconds
-seconds = Seconds
+asSeconds :: Number -> Seconds
+asSeconds = Seconds
+
+-- | Extractor
+runSeconds :: Seconds -> Number
+runSeconds (Seconds x) = x
 
 
 ----------------MillisecondOfSecond----------------
@@ -491,6 +539,10 @@ instance ordMillisecondOfSecond :: Ord MillisecondOfSecond where
 asMillisecondOfSecond :: Int -> MillisecondOfSecond
 asMillisecondOfSecond = clamp <<< MillisecondOfSecond
 
+-- | Extractor
+runMillisecondOfSecond :: MillisecondOfSecond -> Int
+runMillisecondOfSecond (MillisecondOfSecond x) = x
+
 
 ---------------------Milliseconds----------------
 -- | A quantity of milliseconds (not necessarily a value between 0 and 1000).
@@ -501,6 +553,11 @@ instance eqMilliseconds :: Eq Milliseconds where
 
 instance ordMilliseconds :: Ord Milliseconds where
   compare (Milliseconds x) (Milliseconds y) = compare x y
+
+instance hasDecimalMilliseconds :: HasDecimal Milliseconds where
+  intPart (Milliseconds x) = Milliseconds (getIntPart x)
+  decPart (Milliseconds x) = Milliseconds (getDecPart x)
+  getNumber = runMilliseconds
 
 instance semiringMilliseconds :: Semiring Milliseconds where
   add (Milliseconds x) (Milliseconds y) = Milliseconds (x + y)
@@ -523,8 +580,12 @@ instance showMilliseconds :: Show Milliseconds where
   show (Milliseconds n) = "Milliseconds " <> show n
 
 -- | Smart constructor
-ms :: Number -> Milliseconds
-ms = Milliseconds
+asMilliseconds :: Number -> Milliseconds
+asMilliseconds = Milliseconds
+
+-- | Extractor
+runMilliseconds :: Milliseconds -> Number
+runMilliseconds (Milliseconds x) = x
 
 
 ------------------Time Conversions---------------
