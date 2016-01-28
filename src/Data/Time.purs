@@ -40,7 +40,7 @@ runYear (Year x) = x
 
 -- | Smart constructor for year
 asYear :: Int -> Year
-asYear = Year <<< absInt
+asYear = clamp <<< Year
 
 -- | Checks to see if a given year is a leap year
 isLeapYear :: Year -> Boolean
