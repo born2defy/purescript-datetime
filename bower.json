@@ -32,6 +32,8 @@
     "purescript-foldable-traversable":"^0.4.2",
     "purescript-orders":"^0.1.1",
     "purescript-lists":"^0.7.9",
-    "purescript-extensions":"https://born2defy@bitbucket.org/born2defy/purescript-extensions.git#master"
+    "purescript-extensions":"https://born2defy@bitbucket.org/born2defy/purescript-extensions.git#master",
+    "purescript-quickcheck":"0.12.2",
+    "purescript-exists":"^0.2.0"
   }
 }
