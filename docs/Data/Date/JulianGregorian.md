@@ -21,13 +21,10 @@ newtype JulianTime
   = JulianTime Number
 ```
 
-Julian Day.
-The Modified Julian Day is a standard count of days, with zero being the day 1858-11-17.
-The plan is to start with Gregorian since it is easy to enter, then convert to Julian for any date calculations.
-
 ##### Instances
 ``` purescript
 Show JulianTime
+HasDecimal JulianTime
 Eq JulianTime
 Ord JulianTime
 ```
@@ -38,11 +35,15 @@ Ord JulianTime
 runJulianTime :: JulianTime -> Number
 ```
 
+Extract a number from a JulianTime value
+
 #### `addDaysJT`
 
 ``` purescript
 addDaysJT :: Int -> JulianTime -> JulianTime
 ```
+
+Add a number of days to a JulianTime value
 
 #### `diffInDays`
 
@@ -50,47 +51,39 @@ addDaysJT :: Int -> JulianTime -> JulianTime
 diffInDays :: JulianTime -> JulianTime -> Int
 ```
 
-#### `diffInDaysGregorian`
+Get the difference in days between two JulianTime values
+
+#### `getDayOfWeek`
 
 ``` purescript
-diffInDaysGregorian :: GregorianDate -> GregorianDate -> Int
+getDayOfWeek :: JulianTime -> DayOfWeek
 ```
 
-#### `julianTimeToOrdinal`
+Get the DayOfWeek of a JulianTime value
+
+#### `firstJulianDay`
 
 ``` purescript
-julianTimeToOrdinal :: JulianTime -> Tuple Int Int
+firstJulianDay :: DayOfWeek
 ```
 
-#### `ordinalToJulianTime`
+The DayOfWeek of the first Julian Day (day 0)
+
+#### `prettyJulianTime`
 
 ``` purescript
-ordinalToJulianTime :: Tuple Int Int -> JulianTime
+prettyJulianTime :: JulianTime -> String
 ```
 
-#### `julianTimeToGregorian`
+Pretty print a JulianTime value
+
+#### `julianTimeSimple`
 
 ``` purescript
-julianTimeToGregorian :: JulianTime -> GregorianDate
+julianTimeSimple :: Int -> Int -> Int -> JulianTime
 ```
 
-#### `gregorianToJulianTime`
-
-``` purescript
-gregorianToJulianTime :: GregorianDate -> JulianTime
-```
-
-#### `diffGDates`
-
-``` purescript
-diffGDates :: GregorianDate -> GregorianDate -> Int
-```
-
-#### `showJulianTimeAsDateAndTime`
-
-``` purescript
-showJulianTimeAsDateAndTime :: TimeZoneOffset -> JulianTime -> String
-```
+Create a JulianTime value from a Month Date and Year
 
 #### `TimeOfDay`
 
@@ -98,19 +91,21 @@ showJulianTimeAsDateAndTime :: TimeZoneOffset -> JulianTime -> String
 type TimeOfDay = { hours :: HourOfDay, minutes :: MinuteOfHour, seconds :: SecondOfMinute, milliseconds :: MillisecondOfSecond }
 ```
 
-A type representing the time of day
-
 #### `showTimeOfDay`
 
 ``` purescript
 showTimeOfDay :: TimeOfDay -> String
 ```
 
+Display a TimeOfDay value
+
 #### `TimeZoneOffset`
 
 ``` purescript
 type TimeZoneOffset = Int
 ```
+
+The time zone offset
 
 #### `toTimeOfDay`
 
@@ -155,11 +150,31 @@ type TimeStdFmt = { time :: TimeOfDayString, ampm :: String }
 timeToStdFmt :: TimeOfDay -> TimeStdFmt
 ```
 
+Convert a TimeOfDay value to a TimeStdFmt.  This is useful for pretty printing.
+
 #### `showTimeOfDayStd`
 
 ``` purescript
 showTimeOfDayStd :: TimeStdFmt -> String
 ```
+
+One way of displaying the TimeOfDay
+
+#### `getTimeOfDay`
+
+``` purescript
+getTimeOfDay :: TimeZoneOffset -> JulianTime -> TimeOfDay
+```
+
+Get the TimeOfDay from a JulianTime value
+
+#### `showJulianTimeAsDateAndTime`
+
+``` purescript
+showJulianTimeAsDateAndTime :: TimeZoneOffset -> JulianTime -> String
+```
+
+Display a JulianTime value as a Time and Date
 
 #### `GregorianDate`
 
@@ -173,10 +188,84 @@ type GregorianDate = { month :: Month, day :: DayOfMonth, year :: Year }
 showGregorianDate :: GregorianDate -> String
 ```
 
-#### `mkGregorianDate`
+Show a Gregorian Date
+
+#### `gregorianDate`
 
 ``` purescript
-mkGregorianDate :: Int -> Int -> Int -> GregorianDate
+gregorianDate :: Int -> Int -> Int -> GregorianDate
+```
+
+Smart constructor for Gregorian Dates
+
+#### `diffInDaysGregorian`
+
+``` purescript
+diffInDaysGregorian :: GregorianDate -> GregorianDate -> Int
+```
+
+Get the difference in days between two Gregorian Date values
+
+#### `GregorianDate2`
+
+``` purescript
+type GregorianDate2 = { month :: Month, day :: DayOfMonth2, year :: Year }
+```
+
+#### `gregorianToDate`
+
+``` purescript
+gregorianToDate :: forall e. GregorianDate -> Eff (now :: Now, locale :: Locale | e) Date
+```
+
+#### `dateToGregorian`
+
+``` purescript
+dateToGregorian :: Date -> GregorianDate
+```
+
+Convert a Native Date to a Gregorian Date
+
+#### `dateToJulianTime`
+
+``` purescript
+dateToJulianTime :: Date -> JulianTime
+```
+
+Convert a Native Date to a JulianTime value
+
+#### `julianTimeToDate`
+
+``` purescript
+julianTimeToDate :: JulianTime -> Maybe Date
+```
+
+Convert a JulianTime value to a Native Date value
+
+#### `julianTimeToOrdinal`
+
+``` purescript
+julianTimeToOrdinal :: JulianTime -> Tuple Int Int
+```
+
+#### `ordinalToJulianTime`
+
+``` purescript
+ordinalToJulianTime :: Tuple Int Int -> JulianTime
+```
+
+#### `julianTimeToGregorian`
+
+``` purescript
+julianTimeToGregorian :: JulianTime -> GregorianDate
+```
+
+Convert a JulianTime value to a Gregorian Date.
+
+#### `gregorianToJulianTime`
+
+``` purescript
+gregorianToJulianTime :: GregorianDate -> JulianTime
 ```
 
 #### `monthAndDayToDayOfYear`
@@ -197,64 +286,20 @@ dayOfYearToMonthAndDay :: Boolean -> Int -> Tuple Int Int
 findMonthDay :: List Int -> Int -> Tuple Int Int
 ```
 
+Calculate the month and day
+
 #### `monthLengths`
 
 ``` purescript
 monthLengths :: Boolean -> List Int
 ```
 
+Calculate the length of a month
+
 #### `clip`
 
 ``` purescript
 clip :: forall t. (Ord t) => t -> t -> t -> t
-```
-
-#### `gregorianToDate`
-
-``` purescript
-gregorianToDate :: forall e. GregorianDate -> Eff (now :: Now, locale :: Locale | e) Date
-```
-
-#### `dateToGregorian`
-
-``` purescript
-dateToGregorian :: Date -> GregorianDate
-```
-
-#### `dateToJulianTime`
-
-``` purescript
-dateToJulianTime :: Date -> JulianTime
-```
-
-#### `julianTimeToDate`
-
-``` purescript
-julianTimeToDate :: JulianTime -> Maybe Date
-```
-
-#### `prettyJulianTime`
-
-``` purescript
-prettyJulianTime :: JulianTime -> String
-```
-
-#### `msToDayInt`
-
-``` purescript
-msToDayInt :: Number -> Int
-```
-
-#### `dayIntToMS`
-
-``` purescript
-dayIntToMS :: Int -> Number
-```
-
-#### `runMS`
-
-``` purescript
-runMS :: Milliseconds -> Number
 ```
 
 

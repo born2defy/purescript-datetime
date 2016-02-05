@@ -1,4 +1,4 @@
-module BS where
+module Data.HLists.HTests where
 
 import Data.Date.JulianGregorian
 import Data.Time
@@ -6,7 +6,7 @@ import Data.Date.Utilities.HasDecimal (getInt)
 import Prelude
 import Data.Foldable (intercalate)
 import Data.Exists
-import ExistsR
+import Data.HLists.ExistsR
 
 mkDate :: Int -> Int -> Int -> JulianTime
 mkDate = julianTimeSimple

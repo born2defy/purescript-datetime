@@ -1,7 +1,7 @@
 /* global exports */
 "use strict";
 
-// module ExistsR
+// module Data.HLists.ExistsR
 
 exports.mkExistsR = function (fa) {
   return fa;

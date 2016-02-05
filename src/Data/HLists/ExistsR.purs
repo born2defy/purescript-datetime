@@ -1,4 +1,4 @@
-module ExistsR where
+module Data.HLists.ExistsR where
 
 import Prelude
 foreign import data ExistsR :: (# * -> *) -> *
