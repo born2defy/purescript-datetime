@@ -81,6 +81,14 @@ monthToEnum :: Int -> Maybe Month
 monthFromEnum :: Month -> Int
 ```
 
+#### `advanceMonths`
+
+``` purescript
+advanceMonths :: Int -> Month -> Month
+```
+
+Push time forward a certain amount of months
+
 #### `asMonth`
 
 ``` purescript
@@ -96,36 +104,6 @@ daysInMonth :: Boolean -> Month -> Int
 ```
 
 Calculates the total days in a given month based on year
-
-#### `DayOfMonth2`
-
-``` purescript
-newtype DayOfMonth2
-  = DayOfMonth2 Number
-```
-
-##### Instances
-``` purescript
-Eq DayOfMonth2
-Ord DayOfMonth2
-Show DayOfMonth2
-```
-
-#### `runDayOfMonth2`
-
-``` purescript
-runDayOfMonth2 :: DayOfMonth2 -> Number
-```
-
-Extract an Int from a DayOfMonth
-
-#### `asDayOfMonth2`
-
-``` purescript
-asDayOfMonth2 :: Number -> Month -> Year -> DayOfMonth2
-```
-
-Smart constrcutor for DayOfMonth
 
 #### `DayOfMonth`
 
@@ -156,6 +134,22 @@ asDayOfMonth :: Int -> Month -> Year -> DayOfMonth
 ```
 
 Smart constrcutor for DayOfMonth
+
+#### `lastDayOfMonth`
+
+``` purescript
+lastDayOfMonth :: Month -> Year -> DayOfMonth
+```
+
+Get the last day of the current month
+
+#### `firstDayOfMonth`
+
+``` purescript
+firstDayOfMonth :: Month -> DayOfMonth
+```
+
+Get the first day of the current month
 
 #### `DayOfWeek`
 

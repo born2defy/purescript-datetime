@@ -1,19 +1,5 @@
 ## Module Data.Date.JulianGregorian
 
-#### `calcTaxEscrows`
-
-``` purescript
-calcTaxEscrows :: GregorianDate -> Int
-```
-
-#### `monthAsInt`
-
-``` purescript
-monthAsInt :: Month -> Int
-```
-
-Converts an Month into its traditional numeric form
-
 #### `JulianTime`
 
 ``` purescript
@@ -206,11 +192,21 @@ diffInDaysGregorian :: GregorianDate -> GregorianDate -> Int
 
 Get the difference in days between two Gregorian Date values
 
-#### `GregorianDate2`
+#### `endOfMonth`
 
 ``` purescript
-type GregorianDate2 = { month :: Month, day :: DayOfMonth2, year :: Year }
+endOfMonth :: GregorianDate -> GregorianDate
 ```
+
+Take a date and return a new date representing the last day of that month
+
+#### `beginningOfMonth`
+
+``` purescript
+beginningOfMonth :: GregorianDate -> GregorianDate
+```
+
+Takes a `date` and returns a new `date` representing the first day of that month
 
 #### `gregorianToDate`
 
