@@ -137,6 +137,14 @@ monthFromEnum October   = 9
 monthFromEnum November  = 10
 monthFromEnum December  = 11
 
+-- | Push time forward a certain amount of months
+advanceMonths :: Int -> Month -> Month
+advanceMonths n = fromMaybe January
+  <<< toEnum
+  <<< (`mod` 12)
+  <<<  (+ n)
+  <<< fromEnum
+
 -- | Smart Constructor
 asMonth :: Int -> Month
 asMonth n = case n of
@@ -155,6 +163,7 @@ daysInMonth leapYear m = case m of
   September ->  30
   November  ->  30
   _         ->  31
+
 
 ------------------DayOfMonth---------------------
 -- | A day-of-month date component value.
@@ -176,11 +185,19 @@ runDayOfMonth (DayOfMonth x) = x
 -- | Smart constrcutor for DayOfMonth
 asDayOfMonth :: Int -> Month -> Year -> DayOfMonth
 asDayOfMonth n m y = case n of
-  _ | n <= 1              -> DayOfMonth 1
-    | n >= lastDayOfMonth -> DayOfMonth lastDayOfMonth
-    | otherwise           -> DayOfMonth n
-  where
-  lastDayOfMonth = daysInMonth (isLeapYear y) m
+  _ | n <= 1            -> DayOfMonth 1
+    | n >= monthEnd m y -> lastDayOfMonth m y
+    | otherwise         -> DayOfMonth n
+  where monthEnd m = runDayOfMonth <<< lastDayOfMonth m
+
+-- | Get the last day of the current month
+lastDayOfMonth :: Month -> Year -> DayOfMonth
+lastDayOfMonth m y = DayOfMonth $ daysInMonth (isLeapYear y) m
+
+-- | Get the first day of the current month
+firstDayOfMonth :: Month -> DayOfMonth
+firstDayOfMonth _ = DayOfMonth 1
+
 
 ------------------DayOfWeek----------------------
 -- | A day-of-week date component value.

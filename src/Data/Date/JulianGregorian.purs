@@ -1,7 +1,7 @@
 module Data.Date.JulianGregorian where
 
 import Prelude
-import Data.Date.NativeDate
+import Data.Date.NativeDate as Native
 import Data.Time
 import Data.Date.Locale
 import Data.Tuple (Tuple(..), fst, snd, curry)
@@ -10,23 +10,14 @@ import Data.Ord (min)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.List (List(), fromFoldable, uncons)
 import Control.Monad.Eff (Eff())
-import Data.Enum (fromEnum, toEnum)
 import Data.Function (on)
+import Data.Enum (fromEnum, toEnum)
 import Data.Foldable (fold)
 import Data.Date.Utilities.HasDecimal (HasDecimal, decPart, getIntPart, getDecPart, getInt, getDecimal)
 
-calcTaxEscrows :: GregorianDate -> Int
-calcTaxEscrows d = case d of
-  _ | pmtMonth <  November -> 14 - (November `subMonth` pmtMonth)
-    | pmtMonth == November -> 14
-    | otherwise            -> 2
-  where
-  subMonth = sub `on` fromEnum
-  pmtMonth = asMonth $ (monthAsInt d.month) + 1
 
--- | Converts an Month into its traditional numeric form
-monthAsInt :: Month -> Int
-monthAsInt = (+ 1) <<< fromEnum
+
+
 
 -------------------JulianTIme--------------------
 -- | The Modified Julian Day is a standard count of days, with zero being the day 1858-11-17.
@@ -188,26 +179,39 @@ gregorianDate m d y = { month, day, year }
 diffInDaysGregorian :: GregorianDate -> GregorianDate -> Int
 diffInDaysGregorian x y =  (diffInDays `on` gregorianToJulianTime) x y
 
+-- | Take a date and return a new date representing the last day of that month
+endOfMonth :: GregorianDate -> GregorianDate
+endOfMonth g = let day   = lastDayOfMonth g.month g.year
+                   month = g.month
+                   year  = g.year
+               in  { month, day, year }
+
+-- | Takes a `date` and returns a new `date` representing the first day of that month
+beginningOfMonth :: GregorianDate -> GregorianDate
+beginningOfMonth g = let day   = firstDayOfMonth g.month
+                         month = g.month
+                         year  = g.year
+                     in  { month, day, year }
 
 --------------Date Conversions---------------------
 -- | Convert a Gregorian Date to a Native Date
-gregorianToDate :: forall e. GregorianDate -> Eff (now :: Now, locale :: Locale | e) Date
+gregorianToDate :: forall e. GregorianDate -> Eff (now :: Native.Now, locale :: Locale | e) Native.Date
 gregorianToDate d = do
-  currentDate <- now
+  currentDate <- Native.now
   maybeDate   <- date d.year d.month d.day
   return $ fromMaybe currentDate maybeDate
 
 -- | Convert a Native Date to a Gregorian Date
-dateToGregorian :: Date -> GregorianDate
+dateToGregorian :: Native.Date -> GregorianDate
 dateToGregorian = julianTimeToGregorian <<< dateToJulianTime
 
 -- | Convert a Native Date to a JulianTime value
-dateToJulianTime :: Date -> JulianTime
-dateToJulianTime = JulianTime <<< (+ 40587.0) <<< runDays <<< toDays <<< toEpochMilliseconds
+dateToJulianTime :: Native.Date -> JulianTime
+dateToJulianTime = JulianTime <<< (+ 40587.0) <<< runDays <<< toDays <<< Native.toEpochMilliseconds
 
 -- | Convert a JulianTime value to a Native Date value
-julianTimeToDate :: JulianTime -> Maybe Date
-julianTimeToDate = fromEpochMilliseconds <<< toMilliseconds <<< asDays <<< (`sub` 40587.0) <<< runJulianTime
+julianTimeToDate :: JulianTime -> Maybe Native.Date
+julianTimeToDate = Native.fromEpochMilliseconds <<< toMilliseconds <<< asDays <<< (`sub` 40587.0) <<< runJulianTime
 
 -- | convert to ISO 8601 Ordinal Date format. First element of result is year (proleptic Gregoran calendar),
 -- second is the day of the year, with 1 for Jan 1, and 365 (or 366 in leap years) for Dec 31.
