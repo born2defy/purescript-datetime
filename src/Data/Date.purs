@@ -5,7 +5,7 @@ module Data.Date
   , mkDate
   , calcEscrows, calcTaxEscrows
   , daysAfterNow, daysBeforeNow
-  , daysAfter, daysBefore
+  , daysAfter, daysBefore, diffInDays
   , prettyDate, purePrettyDate
   ) where
 
@@ -52,6 +52,10 @@ getCurrentMonth = Native.getCurrentMonth
 -- | Gets the current day from the local machine
 getCurrentDay :: forall eff. Eff (now::Native.Now | eff) DayOfWeek
 getCurrentDay = Native.getCurrentDay
+
+-- | Get the difference in days between two JulianTime values
+diffInDays :: Date -> Date -> Int
+diffInDays = JT.diffInDays
 
 -- | Get the date x number of days from a given date.  Meant to be used infix
 daysAfter :: Int -> Date -> Date
